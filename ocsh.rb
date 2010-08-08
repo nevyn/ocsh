@@ -40,7 +40,7 @@ end
 
 def run_as_unix cmd, argv, print_to_stdout
   flat_args = flatten_argv argv
-  puts "#{cmd} #{flat_args}"
+  puts "#{cmd} #{flat_args}" if ENV['DEBUG'] == "YES"
   if print_to_stdout
     system("#{cmd} #{flat_args}")
     $?
