@@ -25,7 +25,12 @@ def flatten_arg arg
       [flatten_arg(k), flatten_arg(v)]
     end
   else
-    "\"#{arg.to_s}\""
+    s = arg.to_s
+    if s.include? '*'
+      s
+    else
+      "\"#{s}\""
+    end
   end
 end
 
@@ -35,6 +40,7 @@ end
 
 def run_as_unix cmd, argv, print_to_stdout
   flat_args = flatten_argv argv
+  puts "#{cmd} #{flat_args}"
   if print_to_stdout
     system("#{cmd} #{flat_args}")
     $?
