@@ -55,7 +55,7 @@ module IRB
     def prompt prompt, ltype, indent, line_no
       time = Time.new.strftime("%H:%M:%S")
       user = whoami_[0]
-      wd = basename_ Dir.getwd
+      wd = basename_(Dir.getwd)[0]
       wd = "~" if Dir.getwd == ENV["HOME"]
       
       "\033[46m#{time} #{user}:#{wd}#{ltype and ltype or "$"}\033[0m " + " "*indent
