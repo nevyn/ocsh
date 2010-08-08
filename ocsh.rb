@@ -79,7 +79,7 @@ class OGit
     cmd_missing "git", *([subcommand.to_s] + args)
   end
 end
-def ogit
+def git
   OGit.new
 end
 
