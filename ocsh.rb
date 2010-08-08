@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/local/bin/macruby
 require 'irb'
 require 'pp'
 require 'stringio'
