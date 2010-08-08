@@ -4,6 +4,13 @@ require 'pp'
 require 'stringio'
 
 def method_missing(cmd, *argv)
+  argv.map! do |arg|
+    if arg.class == Symbol then
+      "--"+arg.to_s
+    else
+      arg
+    end
+  end
   print_to_stdout = true
   if(cmd.to_s[-1] == "_"[0])
     cmd = cmd.to_s[0...-1].intern
