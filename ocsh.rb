@@ -13,6 +13,7 @@ def method_missing cmd, *argv
   return Kernel::method_missing(cmd, *argv) if $? != 0
   run_as_unix cmd, argv, print_to_stdout
 end
+alias cmd_missing method_missing
 
 
 def flatten_arg arg
@@ -62,12 +63,24 @@ module IRB
   end
 end
 
+
+#required commands
 def cd where
   Dir.chdir(where)
 end
 
+#convenience stuff
 def p *a
   puts *a
+end
+
+class OGit
+  def method_missing subcommand, *args
+    cmd_missing "git", *([subcommand.to_s] + args)
+  end
+end
+def ogit
+  OGit.new
 end
 
 
