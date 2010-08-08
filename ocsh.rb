@@ -3,44 +3,49 @@ require 'irb'
 require 'pp'
 require 'stringio'
 
-def method_missing(cmd, *argv)
-  argv.map! do |arg|
-    if arg.class == Symbol then
-      "--"+arg.to_s
-    else
-      arg
-    end
-  end
+def method_missing cmd, *argv
   print_to_stdout = true
   if(cmd.to_s[-1] == "_"[0])
     cmd = cmd.to_s[0...-1].intern
     print_to_stdout = false
   end
   which = `which #{cmd}`.strip
-  return Kernel::method_missing(cmd) if $? != 0
-  if print_to_stdout
-    system("#{cmd} #{argv.join(" ")}")
+  return Kernel::method_missing(cmd, *argv) if $? != 0
+  run_as_unix cmd, argv, print_to_stdout
+end
+
+
+def flatten_arg arg
+  if arg.class == Symbol then
+    arg.to_s.length < 4 and "-"+arg.to_s or "--"+arg.to_s
+  elsif arg.class == Array
+    arg.map {|a| flatten_arg a }
+  elsif arg.class == Hash
+    arg.map do |k, v|
+      [flatten_arg(k), flatten_arg(v)]
+    end
   else
-    `#{cmd} #{argv.join(" ")}`.split("\n")
+    "\"#{arg.to_s}\""
   end
-#  lines = []
-#  IO.popen("#{cmd} #{argv.join(" ")}") do |pipe|
-#    buf = pipe.read
-#    print buf if print_to_stdout
-#    parts = buf.split("\n")
-#    if lines.length == 0
-#      lines = parts 
-#    else
-#      lines[-1] += parts[0]
-#      lines += parts[1..-1]
-#    end
-#  end
-#  lines
+end
+
+def flatten_argv argv
+  argv.map{ |arg| flatten_arg arg }.flatten.join(" ")
+end
+
+def run_as_unix cmd, argv, print_to_stdout
+  flat_args = flatten_argv argv
+  if print_to_stdout
+    system("#{cmd} #{flat_args}")
+    $?
+  else
+    `#{cmd} #{flat_args}`.split("\n")
+  end
 end
 
 module IRB
   class Irb
-    def prompt(prompt, ltype, indent, line_no)
+    def prompt prompt, ltype, indent, line_no
       time = Time.new.strftime("%H:%M:%S")
       user = whoami_[0]
       wd = basename_ Dir.getwd
